@@ -1,6 +1,6 @@
 context:
-  name: osv-scanner 
-  version: "2.0.2"
+  name: osv-scanner
+  version: "2.0.3"
 
 package:
   name: ${{ name|lower }}
@@ -8,7 +8,7 @@ package:
 
 source:
   - url: https://github.com/google/${{ name }}/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: c419edd454980d7a8c7401baed04748d40342d6a77c1317696876986f171664b
+    sha256: 83864df449bdd335190e5dd7db8d5e1180991796204a0783cdc756834e937576
     target_directory: src
 
 build:
