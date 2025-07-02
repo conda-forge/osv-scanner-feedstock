@@ -12,7 +12,7 @@ source:
     target_directory: src
 
 build:
-  number: 0
+  number: 1
   script:
     - cd src
     # github.com/mattn/go-localereader is an unknown license but is MIT-licensed
