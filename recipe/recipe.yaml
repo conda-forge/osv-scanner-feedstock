@@ -1,6 +1,6 @@
 context:
   name: osv-scanner
-  version: "2.0.3"
+  version: "2.1.0"
 
 package:
   name: ${{ name|lower }}
@@ -8,11 +8,11 @@ package:
 
 source:
   - url: https://github.com/google/${{ name }}/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 83864df449bdd335190e5dd7db8d5e1180991796204a0783cdc756834e937576
+    sha256: 129f534cb55c0811dcf80efec9da7314a4fd87255c093718db9502a4ba19f704
     target_directory: src
 
 build:
-  number: 1
+  number: 0
   script:
     - cd src
     # github.com/mattn/go-localereader is an unknown license but is MIT-licensed
