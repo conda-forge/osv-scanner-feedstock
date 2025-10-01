@@ -17,7 +17,8 @@ build:
     - cd src
     # github.com/mattn/go-localereader is an unknown license but is MIT-licensed
     # modernc.org/mathutil is a BSD-3-Clause license, but the license file is not present in the source code
-    - go-licenses save ./cmd/osv-scanner --save_path ../library_licenses --ignore github.com/google/osv-scanner --ignore github.com/mattn/go-localereader --ignore modernc.org/mathutil
+    # deitch/magic is Apache-2.0 licensed
+    - go-licenses save ./cmd/osv-scanner --save_path ../library_licenses --ignore github.com/google/osv-scanner --ignore github.com/mattn/go-localereader --ignore modernc.org/mathutil --ignore github.com/deitch/magic
     - if: win
       then: go build -v -trimpath -o %LIBRARY_BIN%\osv-scanner.exe -ldflags="-s" ./cmd/osv-scanner
       else: go build -v -trimpath -o $PREFIX/bin/osv-scanner -ldflags="-s -w" ./cmd/osv-scanner
