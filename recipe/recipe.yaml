@@ -31,7 +31,7 @@ requirements:
 
 tests:
   - script:
-      - osv-scanner --help
+      - osv-scanner --help | grep "USAGE"
 
 about:
   homepage: https://github.com/google/osv-scanner
