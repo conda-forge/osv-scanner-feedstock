@@ -8,6 +8,7 @@ context:
   go_mod_localereader: github.com/mattn/go-localereader
   go_mod_mathutil: modernc.org/mathutil
   # build
+  go_path: ${{ "${SRC_DIR}" if unix else "%SRC_DIR%" }}
   go_bin: ${{ "%LIBRARY_BIN%\\osv-scanner.exe" if win else "${PREFIX}/bin/osv-scanner" }}
 
 package:
@@ -30,14 +31,13 @@ source:
 build:
   number: 0
   script:
-    env:
-      GOPATH: ${{ SRC_DIR }}
     content:
+      - ${{ "export" if unix else "set" }} "GOPATH=${{ go_path }}"
       - cd ${{ go_mod }}/cmd/osv-scanner
-      - go build -v -trimpath -o "${{ go_bin }}" -ldflags="-s ${{ "-w" if win}}" .
+      - go build -v -trimpath -o "${{ go_bin }}" -ldflags="-s ${{ "-w" if win }}" .
       - |-
           go-licenses save .
-            --save_path "${{ SRC_DIR }}/library_licenses"
+            --save_path "${{ go_path }}/library_licenses"
             --ignore ${{ go_mod }}
             --ignore ${{ go_mod_localereader }}
             --ignore ${{ go_mod_mathutil }}
