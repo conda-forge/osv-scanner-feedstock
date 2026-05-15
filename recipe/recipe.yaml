@@ -1,15 +1,24 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/prefix-dev/recipe-format/main/schema.json
 context:
   version: "2.3.8"
-  # urls
+  # source
   gh: github.com
   rgh: raw.githubusercontent.com
-  go_mod: github.com/google/osv-scanner
-  go_mod_localereader: github.com/mattn/go-localereader
+  go_mod: ${{ gh }}/google/osv-scanner
+  go_mod_localereader: ${{ gh }}/mattn/go-localereader
   go_mod_mathutil: modernc.org/mathutil
+  go_mod_magic: ${{ gh }}/deitch/magic
   # build
+  go_flags: -s${{ " -w" if win }}
   go_path: ${{ "${SRC_DIR}" if unix else "%SRC_DIR%" }}
   go_bin: ${{ "%LIBRARY_BIN%\\osv-scanner.exe" if win else "${PREFIX}/bin/osv-scanner" }}
+  go_license_ignore: |-
+    --ignore ${{ go_mod }}
+    --ignore ${{ go_mod_localereader }}
+    --ignore ${{ go_mod_magic }}/pkg/magic
+    --ignore ${{ go_mod_magic }}/pkg/magic/internal
+    --ignore ${{ go_mod_magic }}/pkg/magic/parser
+    --ignore ${{ go_mod_mathutil }}
 
 package:
   name: osv-scanner
@@ -17,16 +26,19 @@ package:
 
 source:
   - url: https://${{ go_mod }}/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: d5c64ac45206cc32b2ee1eeac7676a32cf1997dd36f6674ce943f4c2c4911a86
+    sha256: 768e5d38a68b5675cd28a298e6d28973b29170743ae79f5de58be956be4a0c66
     target_directory: ${{ go_mod }}
   # github.com/mattn/go-localereader is an unknown license but is MIT-licensed
   - url: https://${{ go_mod_localereader | replace(gh, rgh) }}/refs/heads/master/LICENSE
-    file_name: manual_licenses/${{ go_mod_localereader }}/LICENSE-MIT
+    target_directory: manual_licenses/${{ go_mod_localereader }}
     sha256: dceede03550621e65ec7b79fcba87cf6dbb9d31132a8ae71a8fe8ceec0af7da3
   # modernc.org/mathutil is a BSD-3-Clause license, but the license file is not present in the source code
   - url: https://gitlab.com/cznic/mathutil/-/raw/master/LICENSE?ref_type=heads
-    file_name: manual_licenses/${{ go_mod_mathutil }}/LICENSE-MIT
+    target_directory: manual_licenses/${{ go_mod_mathutil }}
     sha256: bfa9bf72a72ca009fd62a8f84fca3dca67e51d93af96352723646599898b6cf5
+  - url: https://${{ go_mod_magic | replace(gh, rgh) }}/refs/heads/main/LICENSE
+    target_directory: manual_licenses/${{ go_mod_magic }}
+    sha256: 2423c6eb9948e617a61f7a2d1cb463c69d60e599fbae5931551631d2a8730838
 
 build:
   number: 0
@@ -34,13 +46,9 @@ build:
     content:
       - ${{ "export" if unix else "set" }} "GOPATH=${{ go_path }}"
       - cd ${{ go_mod }}/cmd/osv-scanner
-      - go build -v -trimpath -o "${{ go_bin }}" -ldflags="-s ${{ "-w" if win }}" .
+      - go build -v -trimpath -o "${{ go_bin }}" -ldflags="${{ go_flags }}" .
       - |-
-          go-licenses save .
-            --save_path "${{ go_path }}/library_licenses"
-            --ignore ${{ go_mod }}
-            --ignore ${{ go_mod_localereader }}
-            --ignore ${{ go_mod_mathutil }}
+          go-licenses save . --save_path "${{ go_path }}/library_licenses" ${{ go_license_ignore }}
 
 requirements:
   build:
