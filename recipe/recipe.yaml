@@ -12,13 +12,11 @@ context:
   go_flags: -s${{ " -w" if win }}
   go_path: ${{ "${SRC_DIR}" if unix else "%SRC_DIR%" }}
   go_bin: ${{ "%LIBRARY_BIN%\\osv-scanner.exe" if win else "${PREFIX}/bin/osv-scanner" }}
-  go_license_ignore: |-
-    --ignore ${{ go_mod }}
-    --ignore ${{ go_mod_localereader }}
-    --ignore ${{ go_mod_magic }}/pkg/magic
-    --ignore ${{ go_mod_magic }}/pkg/magic/internal
-    --ignore ${{ go_mod_magic }}/pkg/magic/parser
-    --ignore ${{ go_mod_mathutil }}
+  go_licenses_ignore: |-
+    --ignore=${{ go_mod }} --ignore=${{ go_mod_localereader }} --ignore=${{ go_mod_magic }} --ignore=${{ go_mod_mathutil }}
+  rm_rf: ${{ "rm -rf" if unix else "rd /s /q" }}
+  # test
+  grep: ${{ "grep -iE" if unix else "findstr /c" }}
 
 package:
   name: osv-scanner
@@ -47,8 +45,11 @@ build:
       - ${{ "export" if unix else "set" }} "GOPATH=${{ go_path }}"
       - cd ${{ go_mod }}/cmd/osv-scanner
       - go build -v -trimpath -o "${{ go_bin }}" -ldflags="${{ go_flags }}" .
-      - |-
-          go-licenses save . --save_path "${{ go_path }}/library_licenses" ${{ go_license_ignore }}
+      - go-licenses save . --save_path="${{ go_path }}/library_licenses" ${{ go_licenses_ignore }}
+      # strip big subdirs of source and text fixtures, some long paths
+      - cd "${{ go_path }}/library_licenses/${{ gh }}"
+      - ${{ rm_rf }} cyphar/filepath-securejoin/*/
+      - ${{ rm_rf }} spdx/tools-golang/*/
 
 requirements:
   build:
@@ -57,7 +58,9 @@ requirements:
 
 tests:
   - script:
-      - osv-scanner --help
+      - which osv-scanner || where osv-scanner
+      - osv-scanner --version
+      - osv-scanner --version | ${{ grep }} "${{ version | replace('.', '\\.') }}"
 
 about:
   homepage: https://github.com/google/osv-scanner
