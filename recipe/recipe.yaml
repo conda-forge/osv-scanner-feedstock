@@ -1,31 +1,50 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/prefix-dev/recipe-format/main/schema.json
 context:
-  name: osv-scanner
-  version: "2.3.1"
+  version: "2.3.8"
+  # urls
+  gh: github.com
+  rgh: raw.githubusercontent.com
+  go_mod: github.com/google/osv-scanner
+  go_mod_localereader: github.com/mattn/go-localereader
+  go_mod_mathutil: modernc.org/mathutil
+  # build
+  go_bin: ${{ "%LIBRARY_BIN%\\osv-scanner.exe" if win else "${PREFIX}/bin/osv-scanner" }}
 
 package:
-  name: ${{ name|lower }}
+  name: osv-scanner
   version: ${{ version }}
 
 source:
-  - url: https://github.com/google/${{ name }}/archive/refs/tags/v${{ version }}.tar.gz
+  - url: https://${{ go_mod }}/archive/refs/tags/v${{ version }}.tar.gz
     sha256: d5c64ac45206cc32b2ee1eeac7676a32cf1997dd36f6674ce943f4c2c4911a86
-    target_directory: src
+    target_directory: ${{ go_mod }}
+  # github.com/mattn/go-localereader is an unknown license but is MIT-licensed
+  - url: https://${{ go_mod_localereader | replace(gh, rgh) }}/refs/heads/master/LICENSE
+    file_name: manual_licenses/${{ go_mod_localereader }}/LICENSE-MIT
+    sha256: dceede03550621e65ec7b79fcba87cf6dbb9d31132a8ae71a8fe8ceec0af7da3
+  # modernc.org/mathutil is a BSD-3-Clause license, but the license file is not present in the source code
+  - url: https://gitlab.com/cznic/mathutil/-/raw/master/LICENSE?ref_type=heads
+    file_name: manual_licenses/${{ go_mod_mathutil }}/LICENSE-MIT
+    sha256: bfa9bf72a72ca009fd62a8f84fca3dca67e51d93af96352723646599898b6cf5
 
 build:
   number: 0
   script:
-    - cd src
-    # github.com/mattn/go-localereader is an unknown license but is MIT-licensed
-    # modernc.org/mathutil is a BSD-3-Clause license, but the license file is not present in the source code
-    - go-licenses save ./cmd/osv-scanner --save_path ../library_licenses --ignore github.com/google/osv-scanner --ignore github.com/mattn/go-localereader --ignore modernc.org/mathutil
-    - if: win
-      then: go build -v -trimpath -o %LIBRARY_BIN%\osv-scanner.exe -ldflags="-s" ./cmd/osv-scanner
-      else: go build -v -trimpath -o $PREFIX/bin/osv-scanner -ldflags="-s -w" ./cmd/osv-scanner
-
+    env:
+      GOPATH: ${{ SRC_DIR }}
+    content:
+      - cd ${{ go_mod }}/cmd/osv-scanner
+      - go build -v -trimpath -o "${{ go_bin }}" -ldflags="-s ${{ "-w" if win}}" .
+      - |-
+          go-licenses save .
+            --save_path "${{ SRC_DIR }}/library_licenses"
+            --ignore ${{ go_mod }}
+            --ignore ${{ go_mod_localereader }}
+            --ignore ${{ go_mod_mathutil }}
 
 requirements:
   build:
-    - ${{ compiler('go-nocgo') }}
+    - ${{ compiler("go-nocgo") }}
     - go-licenses
 
 tests:
@@ -37,10 +56,12 @@ about:
   summary: Vulnerability scanner written in Go which uses the data provided by https://osv.dev
   license: Apache-2.0
   license_file:
-    - src/LICENSE
+    - ${{ go_mod }}/LICENSE
     - library_licenses/
+    - manual_licenses/
   repository: https://github.com/google/osv-scanner
 
 extra:
   recipe-maintainers:
     - delsner
+    - bollwyvl
