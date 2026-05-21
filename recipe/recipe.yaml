@@ -9,14 +9,14 @@ context:
   go_mod_mathutil: modernc.org/mathutil
   go_mod_magic: ${{ gh }}/deitch/magic
   # build
-  go_flags: -s${{ " -w" if win }}
-  go_path: ${{ "${SRC_DIR}" if unix else "%SRC_DIR%" }}
-  go_bin: ${{ "%LIBRARY_BIN%\\osv-scanner.exe" if win else "${PREFIX}/bin/osv-scanner" }}
+  go_flags: -s${{ ' -w' if win }}
+  go_path: ${{ '${SRC_DIR}' if unix else '%SRC_DIR%' }}
+  go_bin: ${{ '%LIBRARY_BIN%\\osv-scanner.exe' if win else '${PREFIX}/bin/osv-scanner' }}
   go_licenses_ignore: |-
     --ignore=${{ go_mod }} --ignore=${{ go_mod_localereader }} --ignore=${{ go_mod_magic }} --ignore=${{ go_mod_mathutil }}
-  rm_rf: ${{ "rm -rf" if unix else "rd /s /q" }}
+  rm_rf: ${{ 'rm -rf' if unix else 'rd /s /q' }}
   # test
-  grep: ${{ "grep -iE" if unix else "findstr /c" }}
+  grep: ${{ 'grep -iE' if unix else 'findstr /c' }}
 
 package:
   name: osv-scanner
@@ -42,7 +42,7 @@ build:
   number: 0
   script:
     content:
-      - ${{ "export" if unix else "set" }} "GOPATH=${{ go_path }}"
+      - ${{ 'export' if unix else 'set' }} "GOPATH=${{ go_path }}"
       - cd ${{ go_mod }}/cmd/osv-scanner
       - go build -v -trimpath -o "${{ go_bin }}" -ldflags="${{ go_flags }}" .
       - go-licenses save . --save_path="${{ go_path }}/library_licenses" ${{ go_licenses_ignore }}
@@ -53,7 +53,7 @@ build:
 
 requirements:
   build:
-    - ${{ compiler("go-nocgo") }}
+    - ${{ compiler('go-nocgo') }}
     - go-licenses
 
 tests:
