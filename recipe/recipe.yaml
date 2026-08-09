@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/prefix-dev/recipe-format/main/schema.json
 context:
-  version: "2.4.0"
+  version: "2.5.0"
   # source
   gh: github.com
   rgh: raw.githubusercontent.com
@@ -24,7 +24,7 @@ package:
 
 source:
   - url: https://${{ go_mod }}/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 407ceeb62b2a1f3fb8260bf527f2d61d1079f440e23c8c94a9796791d7edd565
+    sha256: 466d25bf7ab38a9f12d3d15ab0b94432c45849ac91580caa8475bb2ae41faa93
     target_directory: ${{ go_mod }}
   # github.com/mattn/go-localereader is an unknown license but is MIT-licensed
   - url: https://${{ go_mod_localereader | replace(gh, rgh) }}/refs/heads/master/LICENSE
