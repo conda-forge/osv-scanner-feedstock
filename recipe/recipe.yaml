@@ -1,19 +1,20 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/prefix-dev/recipe-format/main/schema.json
 context:
-  version: "2.4.0"
+  version: "2.5.0"
   # source
   gh: github.com
   rgh: raw.githubusercontent.com
   go_mod: ${{ gh }}/google/osv-scanner
+  go_mod_asm: ${{ gh }}/segmentio/asm
   go_mod_localereader: ${{ gh }}/mattn/go-localereader
-  go_mod_mathutil: modernc.org/mathutil
   go_mod_magic: ${{ gh }}/deitch/magic
+  go_mod_mathutil: modernc.org/mathutil
   # build
   go_flags: -s${{ ' -w' if win }}
   go_path: ${{ '${SRC_DIR}' if unix else '%SRC_DIR%' }}
   go_bin: ${{ '%LIBRARY_BIN%\\osv-scanner.exe' if win else '${PREFIX}/bin/osv-scanner' }}
   go_licenses_ignore: |-
-    --ignore=${{ go_mod }} --ignore=${{ go_mod_localereader }} --ignore=${{ go_mod_magic }} --ignore=${{ go_mod_mathutil }}
+    --ignore=${{ go_mod }} --ignore=${{ go_mod_asm }} --ignore=${{ go_mod_localereader }} --ignore=${{ go_mod_magic }} --ignore=${{ go_mod_mathutil }}
   rm_rf: ${{ 'rm -rf' if unix else 'rd /s /q' }}
   # test
   grep: ${{ 'grep -iE' if unix else 'findstr /c' }}
@@ -24,8 +25,12 @@ package:
 
 source:
   - url: https://${{ go_mod }}/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 407ceeb62b2a1f3fb8260bf527f2d61d1079f440e23c8c94a9796791d7edd565
+    sha256: 466d25bf7ab38a9f12d3d15ab0b94432c45849ac91580caa8475bb2ae41faa93
     target_directory: ${{ go_mod }}
+  # github.com/segmentio/asm is an unknown license but is "MIT No Attribution"-licensed
+  - url: https://${{ go_mod_asm | replace(gh, rgh) }}/refs/heads/main/LICENSE
+    sha256: cca993712df289a5958bdef69031a5dac0f951ac15afeb313f9eeea55ed59443
+    target_directory: manual_licenses/${{ go_mod_asm }}
   # github.com/mattn/go-localereader is an unknown license but is MIT-licensed
   - url: https://${{ go_mod_localereader | replace(gh, rgh) }}/refs/heads/master/LICENSE
     target_directory: manual_licenses/${{ go_mod_localereader }}
