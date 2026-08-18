@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/prefix-dev/recipe-format/main/schema.json
 context:
-  version: "2.5.0"
+  version: "2.5.1"
   # source
   gh: github.com
   rgh: raw.githubusercontent.com
@@ -25,7 +25,7 @@ package:
 
 source:
   - url: https://${{ go_mod }}/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 466d25bf7ab38a9f12d3d15ab0b94432c45849ac91580caa8475bb2ae41faa93
+    sha256: 9a81d802aa0c0f667f8a80a045d4bab058fb9d9a6fb21f5cf2f1ea2007f73eef
     target_directory: ${{ go_mod }}
   # github.com/segmentio/asm is an unknown license but is "MIT No Attribution"-licensed
   - url: https://${{ go_mod_asm | replace(gh, rgh) }}/refs/heads/main/LICENSE
