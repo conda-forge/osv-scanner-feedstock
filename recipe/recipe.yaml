@@ -17,7 +17,7 @@ context:
     --ignore=${{ go_mod }} --ignore=${{ go_mod_asm }} --ignore=${{ go_mod_localereader }} --ignore=${{ go_mod_magic }} --ignore=${{ go_mod_mathutil }}
   rm_rf: ${{ 'rm -rf' if unix else 'rd /s /q' }}
   # test
-  grep: ${{ 'grep -iE' if unix else 'findstr /c' }}
+  grep: ${{ 'grep -iE ' if unix else 'findstr /r /c:' }}
 
 package:
   name: osv-scanner
@@ -62,10 +62,14 @@ requirements:
     - go-licenses
 
 tests:
+  - package_contents:
+      strict: true
+      bin:
+        - osv-scanner
   - script:
       - which osv-scanner || where osv-scanner
       - osv-scanner --version
-      - osv-scanner --version | ${{ grep }} "${{ version | replace('.', '\\.') }}"
+      - osv-scanner --version | ${{ grep }}${{ version | replace('.', '\\.') }}
 
 about:
   homepage: https://github.com/google/osv-scanner
